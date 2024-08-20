@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול קוראים</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <label for="parasha">פרשה</label>
+        <input type="text" id="parasha">
+
+        <label for="aliyah-1">ראשון</label>
+        <select id="aliyah-1"></select>
+
+        <label for="aliyah-2">שני</label>
+        <select id="aliyah-2"></select>
+
+        <label for="aliyah-3">שלישי</label>
+        <select id="aliyah-3"></select>
+
+        <label for="aliyah-4">רביעי</label>
+        <select id="aliyah-4"></select>
+
+        <label for="aliyah-5">חמישי</label>
+        <select id="aliyah-5"></select>
+
+        <label for="aliyah-6">שישי</label>
+        <select id="aliyah-6"></select>
+
+        <label for="aliyah-7">שביעי</label>
+        <select id="aliyah-7"></select>
+
+        <div class="buttons">
+            <button id="readers-list-btn">לרשימת הקוראים</button>
+            <button id="history-btn">הסטוריית קריאות</button>
+            <button id="bar-mitzvah-btn">פרשות בר מצווה</button>
+            <button id="archive-btn">שמור בארכיון</button>
+            <button id="clear-btn">נקה שדות</button>
+            <button id="save-btn">שמור</button>
+            <input type="file" id="file-input" style="display: none;">
+            <button id="load-btn">טען</button>
+        </div>
+    </div>
+
+    <div id="readers-list-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('readers-list-modal')">&times;</span>
+            <h2>רשימת קוראים</h2>
+            <div id="readers-list-container"></div>
+            <button id="add-reader-btn">הוסף קורא...</button>
+        </div>
+    </div>
+
+    <script>
+        let readers = ["רועי דגן", "יונה רייכמן"];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            populateAllDropdowns();
+            document.getElementById("readers-list-btn").addEventListener("click", openReadersListModal);
+            document.getElementById("save-btn").addEventListener("click", saveData);
+            document.getElementById("add-reader-btn").addEventListener("click", addReader);
+            document.getElementById("load-btn").addEventListener("click", () => document.getElementById("file-input").click());
+            document.getElementById("file-input").addEventListener("change", loadFile);
+
+            loadData();
+        });
+
+        function populateAllDropdowns() {
+            const aliyahDropdowns = document.querySelectorAll("select[id^='aliyah-']");
+            aliyahDropdowns.forEach(dropdown => {
+                populateDropdown(dropdown);
+            });
+        }
+
+        function populateDropdown(dropdown) {
+            dropdown.innerHTML = "";
+            readers.forEach(reader => {
+                const option = document.createElement("option");
+                option.value = reader;
+                option.textContent = reader;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function loadData() {
+            fetch('data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                	readers = data.readers || [];
+                    populateAllDropdowns();
+                    document.getElementById("parasha").value = data.parasha;
+
+                    for (let i = 1; i <= 7; i++) {
+                        document.getElementById(`aliyah-${i}`).value = data.aliyot[`aliyah-${i}`] || '';
+                    }
+				})
+                .catch(error => console.error('Error loading JSON file:', error));
+        }
+
+        function saveData() {
+            const parasha = document.getElementById("parasha").value;
+            const aliyot = {};
+            for (let i = 1; i <= 7; i++) {
+                aliyot[`aliyah-${i}`] = document.getElementById(`aliyah-${i}`).value;
+            }
+
+            const data = {
+                parasha: parasha,
+                aliyot: aliyot,
+                readers: readers
+            };
+
+            const jsonString = JSON.stringify(data, null, 2);
+
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "data.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function openReadersListModal() {
+            updateReadersList();
+            document.getElementById("readers-list-modal").style.display = "block";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        function updateReadersList() {
+            const container = document.getElementById("readers-list-container");
+            container.innerHTML = "";
+
+            readers.forEach((reader, index) => {
+                const readerItem = document.createElement("div");
+                readerItem.className = "reader-item";
+
+                const readerName = document.createElement("span");
+                readerName.textContent = reader;
+
+                const removeButton = document.createElement("button");
+                removeButton.innerHTML = "X";
+                removeButton.onclick = () => {
+                    removeReader(index);
+                    populateAllDropdowns(); 
+                };
+
+                readerItem.appendChild(removeButton);
+                readerItem.appendChild(readerName);
+                container.appendChild(readerItem);
+            });
+        }
+
+        function removeReader(index) {
+            readers.splice(index, 1);
+            updateReadersList();
+        }
+
+        function addReader() {
+            const newReader = prompt("הזן שם של קורא חדש:");
+            if (newReader) {
+                readers.push(newReader);
+                updateReadersList();
+                populateAllDropdowns(); 
+            }
+        }
+
+        function loadFile(event) {
+            console.log('ff');
+            const file = event.target.files[0];
+            if (file && file.type === "application/json") {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        document.getElementById("parasha").value = data.parasha;
+						readers = data.readers || [];
+						<!-- updateReadersList(); -->
+						populateAllDropdowns();
+                        for (let i = 1; i <= 7; i++) {
+                            document.getElementById(`aliyah-${i}`).value = data.aliyot[`aliyah-${i}`] || '';
+                        }
+						
+                        
+                    } catch (error) {
+                        console.error('Error parsing JSON file:', error);
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                alert("Please select a valid JSON file.");
+            }
+        }
+    </script>
+</body>
+</html>
