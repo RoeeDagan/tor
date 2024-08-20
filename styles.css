@@ -4,10 +4,9 @@ body {
 }
 
 .container {
-    max-width: 100%; /* שינוי מ-400px ל-100% */
+    max-width: 800px;
     margin: auto;
     padding: 20px;
-    box-sizing: border-box; /* להוסיף כדי לוודא שהתוכן לא יחרוג מגבולות האלמנט */
 }
 
 label {
@@ -16,7 +15,7 @@ label {
 }
 
 input, select {
-    width: 100%; /* השאר כמו שזה כדי להבטיח שהאלמנטים יתפרסו לרוחב כל המכשיר */
+    width: 100%;
     padding: 5px;
     margin-bottom: 10px;
 }
@@ -28,17 +27,63 @@ input, select {
 button {
     margin: 5px;
     padding: 10px;
-    width: calc(100% - 10px); /* הוספת רוחב עם חישוב כדי להשאיר מקום למרווח */
 }
 
-/* מדיה קוורי למכשירים קטנים */
-@media only screen and (max-width: 600px) {
-    .container {
-        padding: 10px;
-    }
-    
-    button {
-        width: 100%; /* התפרסות הכפתורים על כל הרוחב */
-        margin: 5px 0; /* כפתורים במרווחים אנכיים */
-    }
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    text-align: center;
+}
+
+.close {
+    color: #aaa;
+    float: left;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    cursor: pointer;
+}
+
+.reader-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #000;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.reader-item button {
+    background: none;
+    border: none;
+    color: red;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#add-reader-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #000;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
 }
