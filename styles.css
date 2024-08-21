@@ -19,6 +19,7 @@ input, select {
     width: 60%;
     padding: 5px;
     margin-bottom: 10px;
+    align-items: center;
 }
 
 .buttons {
