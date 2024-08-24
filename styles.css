@@ -4,22 +4,22 @@ body {
 }
 
 .container {
-    max-width: 100%;
+    max-width: 25%;
     margin: auto;
     padding: 20px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 label {
-    display: block;
     margin-top: 10px;
 }
 
 input, select {
-    width: 25%;
-    padding: 5px;
-    margin-bottom: 5px;
-    marging-left: auto;
-    merging-right: auto;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 10px;
+
 }
 
 .buttons {
@@ -89,3 +89,4 @@ button {
     width: 100%;
     cursor: pointer;
 }
+
