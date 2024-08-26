@@ -61,8 +61,16 @@
 		</div>
 	</div>
 
+	<div id="lastreaders-list-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('lastreaders-list-modal')">&times;</span>
+            <h2>הסטוריית קוראים</h2>
+            <div id="lastreaders-list-container"></div>
+        </div>
+    </div>
+	
     <script>
-        let readers = 	["רועי דגן", "יונה רייכמן"];
+        let readers = 	["ללא","רועי דגן", "יונה רייכמן"];
 		let last_readers = 	[];
 		let parasha = 	{
 						"שמות"	: ["עופר", "יוסי"],
@@ -70,10 +78,11 @@
 						};
 
 		let parasha_name = "בראשית";
-
+		let aliyot_list = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שביעי"];
 		
         document.addEventListener("DOMContentLoaded", function() {
             populateAllDropdowns();
+            document.getElementById("history-btn").addEventListener("click", openHistoryListModal);
             document.getElementById("readers-list-btn").addEventListener("click", openReadersListModal);
             document.getElementById("archive-btn").addEventListener("click", save_last);
             document.getElementById("save-btn").addEventListener("click", saveData);
@@ -128,7 +137,7 @@
 
 		
         function loadData() {
-            console.log("ככ");
+            
 			fetch('data.json')
                 .then(response => {
                     if (!response.ok) {
@@ -154,7 +163,8 @@
 
         function saveData() {
             <!-- const parasha = document.getElementById("parasha").value; -->
-            const aliyot = {};
+            
+			const aliyot = {};
             for (let i = 1; i <= 7; i++) {
                 aliyot[`aliyah-${i}`] = document.getElementById(`aliyah-${i}`).value;
             }
@@ -162,12 +172,12 @@
             const data = {
                 parasha: parasha,
                 aliyot: aliyot,
-				parasha_name : parasha_name,
+				parasha_name : document.getElementById("parasha_name").value,
                 last_readers : last_readers,
                 readers: readers
             };
 			const jsonString = JSON.stringify(data, null, 2);
-
+			
             const blob = new Blob([jsonString], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -179,7 +189,44 @@
             URL.revokeObjectURL(url);
         }
 
-        function openReadersListModal() {
+        function openHistoryListModal() {
+            updateLastReadersList();
+            document.getElementById("lastreaders-list-modal").style.display = "block";
+        }
+		
+		function updateLastReadersList() {
+            const container = document.getElementById("lastreaders-list-container");
+            container.innerHTML = "";
+			
+                    
+            for (let index in last_readers) {
+				<!-- console.log("ff"); -->
+				const aliyahItem = document.createElement("div");
+				aliyahItem.className = "parasha-item";
+
+				// יצירת אלמנט לפרשה וצבעה בירוק
+				const aliyahText = document.createElement("span");
+				aliyahText.textContent = aliyot_list[index];
+				aliyahText.style.color = "green";
+				aliyahText.style.fontWeight = "bold";  // הבלטת הפרשה
+		
+				aliyahItem.appendChild(aliyahText);
+
+				// יצירת אלמנט לקוראים וצבעם בשחור
+				const readersText = document.createElement("span");
+				readersText.textContent = last_readers[index];
+				readersText.style.color = "black";
+
+				aliyahItem.appendChild(readersText);
+
+				
+
+				
+				container.appendChild(aliyahItem);
+			}
+        }
+		
+		function openReadersListModal() {
             updateReadersList();
             document.getElementById("readers-list-modal").style.display = "block";
         }
@@ -228,7 +275,7 @@
         }
 
         function loadFile(event) {
-            console.log("ככ");
+            
             const file = event.target.files[0];
             if (file && file.type === "application/json") {
                 const reader = new FileReader();
@@ -239,8 +286,7 @@
 						readers = data.readers || [];
 						parasha = data.parasha || [];
 						parasha_name = data.parasha_name;
-						console.log("ככ");
-						console.log(last_readers);
+						
 			
 						populateAllDropdowns();
                         for (let i = 1; i <= 7; i++) {
