@@ -76,6 +76,7 @@ button {
     align-items: center;
     border: 1px solid #000;
     padding: 10px;
+	height : 10px;
     margin-bottom: 10px;
 }
 
@@ -101,6 +102,7 @@ button {
     align-items: center;
     border: 1px solid #000;
     padding: 10px;
+	height : 10px;
     margin-bottom: 10px;
 }
 
