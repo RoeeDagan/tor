@@ -7,8 +7,8 @@
 </head>
 <body>
     <div class="container">
-        <label for="parasha">פרשה</label>
-        <input type="text" id="parasha">
+        <label for="parasha_name">פרשה</label>
+        <input type="text" id="parasha_name">
 
         <label for="aliyah-1">ראשון</label>
         <select id="aliyah-1"></select>
@@ -62,13 +62,13 @@
 	</div>
 
     <script>
-        let readers = ["רועי דגן", "יונה רייכמן"];
-		let parasha = {
-						"שמות": ["עופר", "יוסי"],
+        let readers = 	["רועי דגן", "יונה רייכמן"];
+		let parasha = 	{
+						"שמות"	: ["עופר", "יוסי"],
 						"בראשית": ["עודד", "משה"]
-					};
+						};
 
-
+		let parasha_name = "בראשית";
 
 		
         document.addEventListener("DOMContentLoaded", function() {
@@ -85,8 +85,12 @@
 
         function populateAllDropdowns() {
             const aliyahDropdowns = document.querySelectorAll("select[id^='aliyah-']");
-            aliyahDropdowns.forEach(dropdown => {
-                populateDropdown(dropdown);
+            i = 1
+			aliyahDropdowns.forEach(dropdown => {
+                temp = document.getElementById(`aliyah-${i}`).value
+				populateDropdown(dropdown);
+				document.getElementById(`aliyah-${i}`).value = temp;
+				i = i + 1;
             });
         }
 
@@ -94,12 +98,14 @@
             dropdown.innerHTML = "";
             readers.forEach(reader => {
                 const option = document.createElement("option");
+				
                 option.value = reader;
                 option.textContent = reader;
                 dropdown.appendChild(option);
             });
         }
 
+		
         function loadData() {
             fetch('data.json')
                 .then(response => {
@@ -111,8 +117,10 @@
                 .then(data => {
                 	readers = data.readers || [];
                     parasha = data.parasha || [];
-                    populateAllDropdowns();
-                    document.getElementById("parasha").value = data.parasha;
+                    parasha_name = data.parasha_name;
+					populateAllDropdowns();
+                    <!-- document.getElementById("parasha").value = data.parasha; -->
+					document.getElementById("parasha_name").value = data.parasha_name;
 
                     for (let i = 1; i <= 7; i++) {
                         document.getElementById(`aliyah-${i}`).value = data.aliyot[`aliyah-${i}`] || '';
@@ -131,10 +139,10 @@
             const data = {
                 parasha: parasha,
                 aliyot: aliyot,
+				parasha_name : parasha_name,
                 readers: readers
             };
-			console.log(data);
-            const jsonString = JSON.stringify(data, null, 2);
+			const jsonString = JSON.stringify(data, null, 2);
 
             const blob = new Blob([jsonString], { type: "application/json" });
             const url = URL.createObjectURL(blob);
@@ -159,7 +167,8 @@
         function updateReadersList() {
             const container = document.getElementById("readers-list-container");
             container.innerHTML = "";
-
+			
+                    
             readers.forEach((reader, index) => {
                 const readerItem = document.createElement("div");
                 readerItem.className = "reader-item";
@@ -171,7 +180,7 @@
                 removeButton.innerHTML = "X";
                 removeButton.onclick = () => {
                     removeReader(index);
-                    populateAllDropdowns(); 
+					populateAllDropdowns(); 
                 };
 
                 readerItem.appendChild(removeButton);
@@ -204,12 +213,14 @@
                         const data = JSON.parse(e.target.result);
                         readers = data.readers || [];
 						parasha = data.parasha || [];
-						console.log(data);
+						parasha_name = data.parasha_name;
+						console.log('ff');
+						console.log(parasha_name);
 						populateAllDropdowns();
                         for (let i = 1; i <= 7; i++) {
                             document.getElementById(`aliyah-${i}`).value = data.aliyot[`aliyah-${i}`] || '';
                         }
-					    
+					    document.getElementById("parasha_name").value = data.parasha_name;
                     } catch (error) {
                         console.error('Error parsing JSON file:', error);
                     }
@@ -221,28 +232,6 @@
             }
         }
 		
-		<!-- function loadFile(event) { -->
-			<!-- const file = event.target.files[0]; -->
-			<!-- if (file && file.type === "application/json") { -->
-				<!-- const reader = new FileReader(); -->
-				<!-- reader.onload = function(e) { -->
-					<!-- try { -->
-						<!-- const data = JSON.parse(e.target.result); -->
-						<!-- parasha = data.parasha || {}; -->
-						<!-- populateAllDropdowns(); -->
-						<!-- updateParashaList(); -->
-						<!-- for (let i = 1; i <= 7; i++) { -->
-							<!-- document.getElementById(`aliyah-${i}`).value = data.aliyot[`aliyah-${i}`] || ''; -->
-						<!-- } -->
-					<!-- } catch (error) { -->
-						<!-- console.error('Error parsing JSON file:', error); -->
-					<!-- } -->
-				<!-- }; -->
-				<!-- reader.readAsText(file); -->
-			<!-- } else { -->
-				<!-- alert("Please select a valid JSON file."); -->
-			<!-- } -->
-		<!-- } -->
 		
 
 		function openBarMitzvahModal() {
@@ -250,28 +239,7 @@
 			document.getElementById("bar-mitzvah-modal").style.display = "block";
 		}
 
-		<!-- function updateParashaList() { -->
-			<!-- const container = document.getElementById("parasha-list-container"); -->
-			<!-- container.innerHTML = ""; -->
-
-			<!-- parasha.forEach((parasha, index) => { -->
-                <!-- const parashaItem = document.createElement("div"); -->
-                <!-- parashaItem.className = "parasha-item"; -->
-
-                <!-- const parashaName = document.createElement("span"); -->
-                <!-- parashaName.textContent = parasha; -->
-
-                <!-- const removeButton = document.createElement("button"); -->
-                <!-- removeButton.innerHTML = "X"; -->
-                <!-- removeButton.onclick = () => { -->
-                    <!-- removeparasha(index); -->
-                <!-- }; -->
-
-                <!-- parashaItem.appendChild(removeButton); -->
-                <!-- parashaItem.appendChild(parashaName); -->
-                <!-- container.appendChild(parashaItem); -->
-            <!-- }); -->
-		<!-- } -->
+		
 
 		function updateParashaList() {
 			const container = document.getElementById("parasha-list-container");
@@ -297,23 +265,14 @@
 		}
 		
 
-        <!-- function removeparasha(index) { -->
-            <!-- Parasha.splice(index, 1); -->
-            <!-- updateParashaList(); -->
-        <!-- } -->
+        
 		
 		function removeParasha(parashaName) {
 			delete parasha[parashaName];
 			updateParashaList();
 		}
 
-        <!-- function addParasha() { -->
-            <!-- const newParasha = prompt("הזן שם של פרשה חדשה:"); -->
-            <!-- if (newParasha) { -->
-                <!-- parasha.push(newParasha); -->
-                <!-- updateParashaList(); -->
-            <!-- } -->
-        <!-- } -->
+        
 		
 		function addParasha() {
 			const newParasha = prompt("הזן שם של פרשה חדשה או קיימת:");
