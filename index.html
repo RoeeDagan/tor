@@ -63,6 +63,7 @@
 
     <script>
         let readers = 	["רועי דגן", "יונה רייכמן"];
+		let last_readers = 	[];
 		let parasha = 	{
 						"שמות"	: ["עופר", "יוסי"],
 						"בראשית": ["עודד", "משה"]
@@ -74,6 +75,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             populateAllDropdowns();
             document.getElementById("readers-list-btn").addEventListener("click", openReadersListModal);
+            document.getElementById("archive-btn").addEventListener("click", save_last);
             document.getElementById("save-btn").addEventListener("click", saveData);
             document.getElementById("add-reader-btn").addEventListener("click", addReader);
             document.getElementById("load-btn").addEventListener("click", () => document.getElementById("file-input").click());
@@ -83,7 +85,18 @@
 			loadData();
         });
 
-        function populateAllDropdowns() {
+        function save_last() {
+            last_readers = [];
+			const aliyahDropdowns = document.querySelectorAll("select[id^='aliyah-']");
+            i = 1
+			aliyahDropdowns.forEach(dropdown => {
+                temp = document.getElementById(`aliyah-${i}`).value
+				last_readers.push(temp);
+				i = i + 1;
+            });
+        }
+
+		function populateAllDropdowns() {
             const aliyahDropdowns = document.querySelectorAll("select[id^='aliyah-']");
             i = 1
 			aliyahDropdowns.forEach(dropdown => {
@@ -94,20 +107,29 @@
             });
         }
 
-        function populateDropdown(dropdown) {
-            dropdown.innerHTML = "";
-            readers.forEach(reader => {
-                const option = document.createElement("option");
+		function populateDropdown(dropdown) {
+			<!-- const specialReaders = ["רועי דגן"]; // רשימת הקוראים המיוחדים שיצבעו באדום -->
+					
+			dropdown.innerHTML = "";
+			
+			readers.forEach(reader => {
+				const option = document.createElement("option");
+				option.value = reader;
+				option.textContent = reader;
 				
-                option.value = reader;
-                option.textContent = reader;
-                dropdown.appendChild(option);
-            });
-        }
+				// אם שם הקורא נמצא ברשימת הקוראים המיוחדים, נוסיף לו את מחלקת הצבע האדום
+				if (last_readers.includes(reader)) {
+					option.classList.add("red-text");
+				}
+
+				dropdown.appendChild(option);
+			});
+		}
 
 		
         function loadData() {
-            fetch('data.json')
+            console.log("ככ");
+			fetch('data.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -115,7 +137,8 @@
                     return response.json();
                 })
                 .then(data => {
-                	readers = data.readers || [];
+                	last_readers = data.last_readers || [];
+                    readers = data.readers || [];
                     parasha = data.parasha || [];
                     parasha_name = data.parasha_name;
 					populateAllDropdowns();
@@ -140,6 +163,7 @@
                 parasha: parasha,
                 aliyot: aliyot,
 				parasha_name : parasha_name,
+                last_readers : last_readers,
                 readers: readers
             };
 			const jsonString = JSON.stringify(data, null, 2);
@@ -204,18 +228,20 @@
         }
 
         function loadFile(event) {
-            console.log('ff');
+            console.log("ככ");
             const file = event.target.files[0];
             if (file && file.type === "application/json") {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
-                        readers = data.readers || [];
+                        last_readers = data.last_readers || [];
+						readers = data.readers || [];
 						parasha = data.parasha || [];
 						parasha_name = data.parasha_name;
-						console.log('ff');
-						console.log(parasha_name);
+						console.log("ככ");
+						console.log(last_readers);
+			
 						populateAllDropdowns();
                         for (let i = 1; i <= 7; i++) {
                             document.getElementById(`aliyah-${i}`).value = data.aliyot[`aliyah-${i}`] || '';
@@ -240,7 +266,6 @@
 		}
 
 		
-
 		function updateParashaList() {
 			const container = document.getElementById("parasha-list-container");
 			container.innerHTML = "";
@@ -249,8 +274,20 @@
 				const parashaItem = document.createElement("div");
 				parashaItem.className = "parasha-item";
 
+				// יצירת אלמנט לפרשה וצבעה בירוק
 				const parashaText = document.createElement("span");
-				parashaText.textContent = `${parashaName}: ${parasha[parashaName].join(", ")}`;
+				parashaText.textContent = `${parashaName}: `;
+				parashaText.style.color = "green";
+				parashaText.style.fontWeight = "bold";  // הבלטת הפרשה
+		
+				parashaItem.appendChild(parashaText);
+
+				// יצירת אלמנט לקוראים וצבעם בשחור
+				const readersText = document.createElement("span");
+				readersText.textContent = parasha[parashaName].join(", ");
+				readersText.style.color = "black";
+
+				parashaItem.appendChild(readersText);
 
 				const removeButton = document.createElement("button");
 				removeButton.innerHTML = "X";
@@ -259,10 +296,11 @@
 				};
 
 				parashaItem.appendChild(removeButton);
-				parashaItem.appendChild(parashaText);
 				container.appendChild(parashaItem);
 			}
 		}
+
+		
 		
 
         
