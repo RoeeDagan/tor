@@ -7,7 +7,7 @@
 </head>
 <body>
     <div class="container">
-        <label for="parasha_name">פרשה</label>
+        <label for="parasha_name"> </label>
         <input type="text" id="parasha_name">
 
         <label for="aliyah-1">ראשון</label>
@@ -70,7 +70,7 @@
     </div>
 	
     <script>
-        let readers = 	["ללא","רועי דגן", "יונה רייכמן"];
+        let readers = 	["רועי דגן", "יונה רייכמן"];
 		let last_readers = 	[];
 		let parasha = 	{
 						"שמות"	: ["עופר", "יוסי"],
@@ -82,6 +82,7 @@
 		
         document.addEventListener("DOMContentLoaded", function() {
             populateAllDropdowns();
+            document.getElementById("clear-btn").addEventListener("click", clearFunc);
             document.getElementById("history-btn").addEventListener("click", openHistoryListModal);
             document.getElementById("readers-list-btn").addEventListener("click", openReadersListModal);
             document.getElementById("archive-btn").addEventListener("click", save_last);
@@ -94,7 +95,17 @@
 			loadData();
         });
 
-        function save_last() {
+        function clearFunc() {
+            const aliyahDropdowns = document.querySelectorAll("select[id^='aliyah-']");
+            i = 1
+			aliyahDropdowns.forEach(dropdown => {
+                document.getElementById(`aliyah-${i}`).value = "";
+				document.getElementById("parasha_name").value = "הזן פרשה";
+				i = i + 1;
+            });
+        }
+		
+		function save_last() {
             last_readers = [];
 			const aliyahDropdowns = document.querySelectorAll("select[id^='aliyah-']");
             i = 1
@@ -254,8 +265,8 @@
 					populateAllDropdowns(); 
                 };
 
-                readerItem.appendChild(removeButton);
                 readerItem.appendChild(readerName);
+                readerItem.appendChild(removeButton);
                 container.appendChild(readerItem);
             });
         }
